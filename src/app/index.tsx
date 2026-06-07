@@ -1,98 +1,139 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+export default function Index() {
+  const [tiles, setTiles] = useState([
+    [2, 0, 0, 0],
+    [2, 2, 0, 0],
+    [2, 2, 2, 0],
+    [2, 2, 2, 2],
+  ]);
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if (key === "w" || key === "arrowup") tilesUp();
+      else if (key === "s" || key === "arrowdown") tilesDown();
+      else if (key === "a" || key === "arrowleft") tilesLeft();
+      else if (key === "d" || key === "arrowright") tilesRight();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [tiles]);
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  function mergeRowTiles(arr: number[]) {
+    let filteredArr: number[] = arr.filter((num) => num !== 0);
+    for (let i = 0; i < filteredArr.length - 1; i++) {
+      if (filteredArr[i] === filteredArr[i + 1]) {
+        filteredArr[i] *= 2;
+        filteredArr[i + 1] = 0;
+        i++;
+      }
+    }
+    filteredArr = filteredArr.filter((num) => num !== 0);
+    while (filteredArr.length < arr.length) {
+      filteredArr.push(0);
+    }
+    return filteredArr;
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+
+  function rotate(matrix: number[][]) {
+    return matrix[0].map((_, colIndex) =>
+      matrix.map((row) => row[colIndex]).reverse(),
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  function reverseRotate(matrix: number[][]) {
+    return matrix[0]
+      .map((_, colIndex) =>
+        matrix
+          .map((row) => row[colIndex])
+          .reverse()
+          .reverse(),
+      )
+      .reverse();
+  }
+
+  function tilesLeft() {
+    let rotatedTiles = tiles;
+    let newTiles: number[][] = [];
+    rotatedTiles.forEach((rowTiles) => {
+      newTiles.push(mergeRowTiles(rowTiles));
+    });
+    setTiles(newTiles);
+    console.log(newTiles);
+  }
+
+  function tilesDown() {
+    let rotatedTiles = rotate(tiles);
+    let newTiles: number[][] = [];
+    rotatedTiles.forEach((rowTiles) => {
+      newTiles.push(mergeRowTiles(rowTiles));
+    });
+    newTiles = reverseRotate(newTiles);
+    setTiles(newTiles);
+    console.log(newTiles);
+  }
+
+  function tilesRight() {
+    let rotatedTiles = rotate(rotate(tiles));
+    let newTiles: number[][] = [];
+    rotatedTiles.forEach((rowTiles) => {
+      newTiles.push(mergeRowTiles(rowTiles));
+    });
+    newTiles = rotate(rotate(newTiles));
+    setTiles(newTiles);
+    console.log(newTiles);
+  }
+
+  function tilesUp() {
+    let rotatedTiles = reverseRotate(tiles);
+    let newTiles: number[][] = [];
+    rotatedTiles.forEach((rowTiles) => {
+      newTiles.push(mergeRowTiles(rowTiles));
+    });
+    newTiles = rotate(newTiles);
+    setTiles(newTiles);
+    console.log(newTiles);
+  }
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <View style={styles.container}>
+      {tiles.map((rowTiles, rowId) => (
+        <View key={rowId} style={styles.tileRow}>
+          {rowTiles.map((tile, id) => (
+            <View key={id} style={styles.tile}>
+              <Text style={styles.tileText}>{tile}</Text>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#faf8ef",
+    padding: 20,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  tileRow: {
+    flexDirection: "row",
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  tile: {
+    width: 100,
+    height: 100,
+    backgroundColor: "#cdc1b4",
+    margin: 4,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  tileText: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#776e65",
   },
 });
