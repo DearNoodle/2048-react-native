@@ -2,14 +2,10 @@ import { useTiles } from "@/hooks/useTiles";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
-  const { tiles, handleTouchStart, handleTouchEnd } = useTiles();
+  const { tiles } = useTiles();
 
   return (
-    <View
-      style={styles.container}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <View style={styles.container}>
       {tiles.map((rowTiles, rowId) => (
         <View key={rowId} style={styles.tileRow}>
           {rowTiles.map((tile, id) => {
@@ -50,7 +46,6 @@ const tileTheme: Record<
   2048: { bg: "#edc22e", text: "#f9f6f2", size: 22 }, // Ultimate deep gold
   ">2048": { bg: "#73b", text: "#ffffff", size: 20 },
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -63,8 +58,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tile: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     margin: 4,
     borderRadius: 8,
     alignItems: "center",

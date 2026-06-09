@@ -4,7 +4,8 @@ import {
   reverseRotate,
   rotate,
 } from "@/game/tileLogic";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { GestureResponderEvent } from "react-native";
 
 export function useTiles() {
   const [tiles, setTiles] = useState([
@@ -14,17 +15,7 @@ export function useTiles() {
     [0, 0, 0, 0],
   ]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      if (key === "w" || key === "arrowup") tilesUp();
-      else if (key === "s" || key === "arrowdown") tilesDown();
-      else if (key === "a" || key === "arrowleft") tilesLeft();
-      else if (key === "d" || key === "arrowright") tilesRight();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [tiles]);
+  const touchStart = useRef({ x: 0, y: 0 });
 
   function tilesLeft() {
     let newTiles: number[][] = [];
@@ -57,5 +48,47 @@ export function useTiles() {
     setTiles(newTiles);
   }
 
-  return { tiles, setTiles };
+  const handleTouchStart = (e: GestureResponderEvent) => {
+    touchStart.current = {
+      x: e.nativeEvent.pageX,
+      y: e.nativeEvent.pageY,
+    };
+  };
+
+  const handleTouchEnd = (e: GestureResponderEvent) => {
+    const touchEndX = e.nativeEvent.pageX;
+    const touchEndY = e.nativeEvent.pageY;
+
+    const dx = touchEndX - touchStart.current.x;
+    const dy = touchEndY - touchStart.current.y;
+
+    const SWIPE_THRESHOLD = 30;
+
+    if (Math.abs(dx) > SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_THRESHOLD) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          tilesRight();
+        } else {
+          tilesLeft();
+        }
+      } else {
+        if (dy > 0) {
+          tilesDown();
+        } else {
+          tilesUp();
+        }
+      }
+    }
+  };
+
+  return {
+    tiles,
+    setTiles,
+    handleTouchStart,
+    handleTouchEnd,
+    tilesUp,
+    tilesDown,
+    tilesLeft,
+    tilesRight,
+  };
 }
