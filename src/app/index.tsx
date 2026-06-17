@@ -1,4 +1,4 @@
-import { useTiles } from "@/hooks/useTiles";
+import { useTiles } from "@/hooks/useBoard";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {

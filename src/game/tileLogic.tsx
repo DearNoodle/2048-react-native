@@ -1,32 +1,37 @@
-export function mergeTiles(tiles: number[][], newTiles: number[][]) {
-  function mergeRowTiles(rowTiles: number[]) {
-    let newRowTiles: number[] = rowTiles.filter((num) => num !== 0);
+export function mergeTiles(tiles: (number | null)[][]) {
+  function mergeRowTiles(rowTiles: (number | null)[]) {
+    let newRowTiles: (number | null)[] = rowTiles.filter((num) => num !== null);
     for (let i = 0; i < newRowTiles.length - 1; i++) {
       if (newRowTiles[i] === newRowTiles[i + 1]) {
-        newRowTiles[i] *= 2;
-        newRowTiles[i + 1] = 0;
+        newRowTiles[i]! *= 2;
+        newRowTiles[i + 1] = null;
         i++;
       }
     }
     newRowTiles = newRowTiles.filter((num) => num !== 0);
     while (newRowTiles.length < rowTiles.length) {
-      newRowTiles.push(0);
+      newRowTiles.push(null);
     }
     return newRowTiles;
   }
+
+  let newTiles: (number | null)[][] = [];
   tiles.forEach((rowTiles) => {
     newTiles.push(mergeRowTiles(rowTiles));
   });
+
+  return newTiles;
 }
 
-export function rotate(tiles: number[][]) {
-  return tiles[0].map((_, colIndex) =>
+export function rotate(tiles: (number | null)[][]) {
+  tiles = tiles[0].map((_, colIndex) =>
     tiles.map((row) => row[colIndex]).reverse(),
   );
+  return tiles;
 }
 
-export function reverseRotate(tiles: number[][]) {
-  return tiles[0]
+export function reverseRotate(tiles: (number | null)[][]) {
+  tiles = tiles[0]
     .map((_, colIndex) =>
       tiles
         .map((row) => row[colIndex])
@@ -34,9 +39,10 @@ export function reverseRotate(tiles: number[][]) {
         .reverse(),
     )
     .reverse();
+  return tiles;
 }
 
-export function generateNewTile(tiles: number[][]) {
+export function generateNewTile(tiles: (number | null)[][]) {
   function allAdjacentsNotSame() {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[i].length; j++) {
@@ -50,19 +56,19 @@ export function generateNewTile(tiles: number[][]) {
     }
     return true;
   }
-  if (tiles.every((row) => row.every((val) => val !== 0))) {
+  if (tiles.every((row) => row.every((val) => val !== null))) {
     if (allAdjacentsNotSame()) {
       alert("end");
       // gameEnd();
     }
-    return;
+    return tiles;
   }
   const tileValue = Math.random() < 0.5 ? 2 : 4;
-
   let x, y;
   do {
     x = Math.floor(Math.random() * 4);
     y = Math.floor(Math.random() * 4);
-  } while (tiles[x][y] !== 0);
+  } while (tiles[x][y] !== null);
   tiles[x][y] = tileValue;
+  return tiles;
 }
