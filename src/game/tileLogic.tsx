@@ -2,7 +2,11 @@ import { Tile } from "@/types";
 
 export function mergeTiles(tiles: Tile[][]) {
   function mergeRowTiles(rowTiles: Tile[]) {
-    const rTiles = rowTiles.map((tile) => ({ ...tile, from: tile.id }));
+    const rTiles = rowTiles.map((tile) => ({
+      ...tile,
+      from: tile.id,
+      type: null,
+    }));
     // case12 ->
     // case13 & case23 ->
     // case14 & case24 & case34

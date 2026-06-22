@@ -1,6 +1,6 @@
 // react native web
 import { Tile } from "@/types";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,7 +11,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
+function BoardTileComponent({
+  tile,
+  prevTile,
+}: {
+  tile: Tile;
+  prevTile: Tile;
+}) {
   const tileWidth = 106;
   const tileMargin = 4;
   const cellSize = tileWidth + tileMargin * 2;
@@ -78,7 +84,6 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
                 stiffness: 150,
               }),
             );
-            tile.type = null;
           }
         },
       );
@@ -209,6 +214,8 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
     </>
   );
 }
+
+export const BoardTile = memo(BoardTileComponent);
 const tileTheme: Record<
   number | ">2048",
   { bg: string; text: string; size: number }

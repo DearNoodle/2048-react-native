@@ -1,4 +1,5 @@
 import {
+  checkGameEnd,
   generateNewTile,
   mergeTiles,
   reverseRotate,
@@ -8,79 +9,72 @@ import { Board, Tile } from "@/types";
 import { useRef, useState } from "react";
 import { GestureResponderEvent } from "react-native";
 
+const generateId = () =>
+  typeof globalThis.crypto !== "undefined" &&
+  typeof globalThis.crypto.randomUUID === "function"
+    ? globalThis.crypto.randomUUID()
+    : `id-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+
 export function useBoard() {
-  const [board, setBoard] = useState(generateInitialBoard());
-  function generateInitialBoard(): Board {
-    const board: Board = [];
+  const [isGameEnd, setIsGameEnd] = useState(false);
+  const [[board, prevBoard], setBoard] = useState(generateInitialBoard());
+  const touchStart = useRef({ x: 0, y: 0 });
+  function generateInitialBoard(): [Board, Board] {
+    let board: Board = [];
 
     for (let rowIndex = 0; rowIndex < 4; rowIndex++) {
       const row: Tile[] = [];
 
       for (let colIndex = 0; colIndex < 4; colIndex++) {
+        const id = generateId();
         row.push({
-          id: rowIndex * 4 + colIndex,
-          value: null,
+          id,
+          col: colIndex,
+          row: rowIndex,
+          value: 0,
+          from: id,
+          type: null,
         });
       }
-
       board.push(row);
     }
-
-    return board;
-  }
-
-  const touchStart = useRef({ x: 0, y: 0 });
-
-  function removeId(board: Board) {
-    const tiles: (number | null)[][] = board.map((row) =>
-      row.map((tile) => tile.value),
-    );
-    return tiles;
-  }
-  function giveId(tiles: (number | null)[][]) {
-    let id: number = 0;
-    const newBoard: Board = tiles.map((row) =>
-      row.map((val) => ({
-        id: id++,
-        value: val,
-      })),
-    );
-    return newBoard;
+    board = generateNewTile(generateNewTile(board));
+    return [board, board];
   }
 
   function tilesLeft() {
-    let tiles = removeId(board);
-    tiles = mergeTiles(tiles);
-    tiles = generateNewTile(tiles);
-    const newBoard = giveId(tiles);
-    setBoard(newBoard);
+    let newBoard = mergeTiles(board);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
+    setBoard([newBoard, board]);
   }
 
   function tilesDown() {
-    let tiles = removeId(board);
-    tiles = mergeTiles(rotate(tiles));
-    tiles = reverseRotate(tiles);
-    tiles = generateNewTile(tiles);
-    const newBoard = giveId(tiles);
-    setBoard(newBoard);
+    let newBoard = mergeTiles(rotate(board));
+    newBoard = reverseRotate(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
+    setBoard([newBoard, board]);
   }
 
   function tilesRight() {
-    let tiles = removeId(board);
-    tiles = mergeTiles(rotate(rotate(tiles)));
-    tiles = rotate(rotate(tiles));
-    tiles = generateNewTile(tiles);
-    const newBoard = giveId(tiles);
-    setBoard(newBoard);
+    let newBoard = mergeTiles(rotate(rotate(board)));
+    newBoard = rotate(rotate(newBoard));
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
+    setBoard([newBoard, board]);
   }
 
   function tilesUp() {
-    let tiles = removeId(board);
-    tiles = mergeTiles(reverseRotate(tiles));
-    tiles = rotate(tiles);
-    tiles = generateNewTile(tiles);
-    const newBoard = giveId(tiles);
-    setBoard(newBoard);
+    let newBoard = mergeTiles(reverseRotate(board));
+    newBoard = rotate(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
+    setBoard([newBoard, board]);
   }
 
   const handleTouchStart = (e: GestureResponderEvent) => {
@@ -118,7 +112,9 @@ export function useBoard() {
 
   return {
     board,
+    prevBoard,
     setBoard,
+    isGameEnd,
     handleTouchStart,
     handleTouchEnd,
     tilesUp,
