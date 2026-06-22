@@ -9,6 +9,7 @@ import { Board, Tile } from "@/types";
 import { useEffect, useState } from "react";
 
 export function useBoard() {
+  const [isGameEnd, setIsGameEnd] = useState(false);
   const [[board, prevBoard], setBoard] = useState(generateInitialBoard());
   function generateInitialBoard(): [Board, Board] {
     let board: Board = [];
@@ -48,34 +49,38 @@ export function useBoard() {
 
   function tilesLeft() {
     let newBoard = mergeTiles(board);
-    checkGameEnd(newBoard);
-    newBoard = generateNewTile(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
     setBoard([newBoard, board]);
   }
 
   function tilesDown() {
     let newBoard = mergeTiles(rotate(board));
     newBoard = reverseRotate(newBoard);
-    checkGameEnd(newBoard);
-    newBoard = generateNewTile(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
     setBoard([newBoard, board]);
   }
 
   function tilesRight() {
     let newBoard = mergeTiles(rotate(rotate(board)));
     newBoard = rotate(rotate(newBoard));
-    checkGameEnd(newBoard);
-    newBoard = generateNewTile(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
     setBoard([newBoard, board]);
   }
 
   function tilesUp() {
     let newBoard = mergeTiles(reverseRotate(board));
     newBoard = rotate(newBoard);
-    checkGameEnd(newBoard);
-    newBoard = generateNewTile(newBoard);
+    const end = checkGameEnd(newBoard);
+    setIsGameEnd(end);
+    if (!end) newBoard = generateNewTile(newBoard);
     setBoard([newBoard, board]);
   }
 
-  return { board, prevBoard, setBoard };
+  return { board, prevBoard, setBoard, isGameEnd };
 }

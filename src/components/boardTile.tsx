@@ -23,8 +23,6 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
   const hasValue = tile.value != null && tile.value !== 0;
   const textValue = useSharedValue(hasValue ? tile.value : 0);
 
-  // Use a shared value to control the stationary merge-to tile scale so we
-  // don't rerender to hide it. Start visible for a merge, otherwise hidden.
   const mergeToScale = useSharedValue(tile.type === "merge" ? 1 : 0);
   useEffect(() => {
     if (tile.type === "merge") {
@@ -56,19 +54,16 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
       break;
 
     case "merge":
-      // show previous value, position at prev tile, then animate to target
       textValue.value = prevTile.value ? prevTile.value : 0;
       scale.value = 1;
       xPos.value = prevTile.col * cellSize;
       yPos.value = prevTile.row * cellSize;
 
-      // update displayed value after 300ms using a shared-value delay (no setTimeout)
       textValue.value = withDelay(
         250,
         withTiming(tile.value ? tile.value : 0, { duration: 1 }),
       );
 
-      // animate movement; when finished shrink the merge-to tile
       xPos.value = withTiming(tile.col * cellSize, { duration: 250 });
       yPos.value = withTiming(
         tile.row * cellSize,
@@ -77,7 +72,7 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
           if (finished) {
             mergeToScale.value = 0;
             scale.value = withSequence(
-              withTiming(1.1, { duration: 100 }), // 先快速放大到 1.1
+              withTiming(1.1, { duration: 100 }),
               withSpring(1, {
                 damping: 40,
                 stiffness: 150,
@@ -92,7 +87,7 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
     case "spawn":
       xPos.value = tile.col * cellSize;
       yPos.value = tile.row * cellSize;
-      // ensure the tile starts scaled to 0 so the spawn animation always runs
+
       scale.value = 0;
       scale.value = withDelay(350, withTiming(1, { duration: 250 }));
       break;
@@ -172,7 +167,6 @@ export function BoardTile({ tile, prevTile }: { tile: Tile; prevTile: Tile }) {
 
   return (
     <>
-      {/* stationary destination tile shown during merge (scale animated, no rerender) */}
       {tile.type === "merge" && (
         <Animated.View
           style={[

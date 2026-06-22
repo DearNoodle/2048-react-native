@@ -126,13 +126,11 @@ export function checkGameEnd(tiles: Tile[][]) {
     }
     return true;
   }
-  if (tiles.every((row) => row.every((tile) => tile.value !== 0))) {
-    if (allAdjacentsNotSame()) {
-      alert("end");
-      // gameEnd();
-    }
-    return tiles;
-  }
+
+  return (
+    tiles.every((row) => row.every((tile) => tile.value !== 0)) &&
+    allAdjacentsNotSame()
+  );
 }
 
 export function generateNewTile(tiles: Tile[][]): Tile[][] {

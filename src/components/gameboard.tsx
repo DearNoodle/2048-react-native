@@ -3,9 +3,11 @@ import { Tile } from "@/types";
 import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { BoardTile } from "./boardTile";
+import { GameEndModal } from "./gameEndModal";
 
 export function GameBoard() {
-  const { board, prevBoard } = useBoard();
+  const { board, prevBoard, isGameEnd } = useBoard();
+  const flatBoard = useMemo(() => board.flat(), [board]);
   const flatPrevBoard = useMemo(() => prevBoard.flat(), [prevBoard]);
   // const valuesMatrix = board.map((row) =>
   //   row.map((tile: Tile) => (tile.value === 0 ? "." : tile.value)),
@@ -16,13 +18,14 @@ export function GameBoard() {
   return (
     <View style={styles.container}>
       <View style={styles.board}>
-        {board.flat().map((tile: Tile) => {
+        {flatBoard.flat().map((tile: Tile) => {
           const prevTile =
             flatPrevBoard.find(
               (pTile: Tile) => tile.from && tile.from === pTile.id,
             ) ?? tile;
           return <BoardTile key={tile.id} tile={tile} prevTile={prevTile} />;
         })}
+        <GameEndModal isVisible={isGameEnd} />
       </View>
     </View>
   );
@@ -30,6 +33,7 @@ export function GameBoard() {
 
 const styles = StyleSheet.create({
   board: {
+    position: "relative",
     backgroundColor: "#bbada0",
     padding: 12,
     borderRadius: 12,
