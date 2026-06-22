@@ -2,11 +2,13 @@ import { Tile } from "@/types";
 
 export function mergeTiles(tiles: Tile[][]) {
   function mergeRowTiles(rowTiles: Tile[]) {
-    const rTiles = rowTiles.map((tile) => ({
+    const rTiles: Tile[] = rowTiles.map((tile) => ({
       ...tile,
       from: tile.id,
       type: null,
     }));
+    let mergeScore = 0;
+
     // case12 ->
     // case13 & case23 ->
     // case14 & case24 & case34
@@ -34,7 +36,9 @@ export function mergeTiles(tiles: Tile[][]) {
         if (isBlocked) {
           continue;
         }
+
         rTiles[mergeCase.mergeTo].value! *= 2;
+        mergeScore += rTiles[mergeCase.mergeTo].value!;
         rTiles[mergeCase.mergeTo].from = rTiles[mergeCase.mergeBy].id;
         rTiles[mergeCase.mergeTo].type = "merge";
         rTiles[mergeCase.mergeBy].value = 0;
@@ -47,6 +51,7 @@ export function mergeTiles(tiles: Tile[][]) {
           rTiles[2].value !== 0
         ) {
           rTiles[2].value! *= 2;
+          mergeScore += rTiles[2].value!;
           rTiles[2].from = rTiles[3].id;
           rTiles[2].type = "merge";
           rTiles[3].value = 0;
@@ -74,14 +79,17 @@ export function mergeTiles(tiles: Tile[][]) {
       tile.from = resultTiles[tile.col].id;
       tile.type = tile.col === originalCol ? "rest" : "move";
     });
-    return resultTiles;
+    return { row: resultTiles, score: mergeScore };
   }
 
   let newTiles: Tile[][] = [];
+  let score = 0;
   tiles.forEach((rowTiles) => {
-    newTiles.push(mergeRowTiles(rowTiles));
+    const merged = mergeRowTiles(rowTiles);
+    newTiles.push(merged.row);
+    score += merged.score;
   });
-  return newTiles;
+  return { board: newTiles, score };
 }
 
 export function rotate(tiles: Tile[][]): Tile[][] {

@@ -17,8 +17,10 @@ const generateId = () =>
 
 export function useBoard() {
   const [isGameEnd, setIsGameEnd] = useState(false);
+  const [score, setScore] = useState(0);
   const [[board, prevBoard], setBoard] = useState(generateInitialBoard());
   const touchStart = useRef({ x: 0, y: 0 });
+
   function generateInitialBoard(): [Board, Board] {
     let board: Board = [];
 
@@ -42,39 +44,41 @@ export function useBoard() {
     return [board, board];
   }
 
-  function tilesLeft() {
-    let newBoard = mergeTiles(board);
-    const end = checkGameEnd(newBoard);
+  function resetBoard() {
+    setScore(0);
+    setIsGameEnd(false);
+    setBoard(generateInitialBoard());
+  }
+
+  function applyMove(nextBoard: Board, moveScore: number) {
+    setScore((current) => current + moveScore);
+    const end = checkGameEnd(nextBoard);
     setIsGameEnd(end);
-    if (!end) newBoard = generateNewTile(newBoard);
-    setBoard([newBoard, board]);
+    if (!end) nextBoard = generateNewTile(nextBoard);
+    setBoard([nextBoard, board]);
+  }
+
+  function tilesLeft() {
+    const merged = mergeTiles(board);
+    applyMove(merged.board, merged.score);
   }
 
   function tilesDown() {
-    let newBoard = mergeTiles(rotate(board));
-    newBoard = reverseRotate(newBoard);
-    const end = checkGameEnd(newBoard);
-    setIsGameEnd(end);
-    if (!end) newBoard = generateNewTile(newBoard);
-    setBoard([newBoard, board]);
+    const merged = mergeTiles(rotate(board));
+    const nextBoard = reverseRotate(merged.board);
+    applyMove(nextBoard, merged.score);
   }
 
   function tilesRight() {
-    let newBoard = mergeTiles(rotate(rotate(board)));
-    newBoard = rotate(rotate(newBoard));
-    const end = checkGameEnd(newBoard);
-    setIsGameEnd(end);
-    if (!end) newBoard = generateNewTile(newBoard);
-    setBoard([newBoard, board]);
+    const merged = mergeTiles(rotate(rotate(board)));
+    const nextBoard = rotate(rotate(merged.board));
+    applyMove(nextBoard, merged.score);
   }
 
   function tilesUp() {
-    let newBoard = mergeTiles(reverseRotate(board));
-    newBoard = rotate(newBoard);
-    const end = checkGameEnd(newBoard);
-    setIsGameEnd(end);
-    if (!end) newBoard = generateNewTile(newBoard);
-    setBoard([newBoard, board]);
+    const merged = mergeTiles(reverseRotate(board));
+    const nextBoard = rotate(merged.board);
+    applyMove(nextBoard, merged.score);
   }
 
   const handleTouchStart = (e: GestureResponderEvent) => {
@@ -115,6 +119,8 @@ export function useBoard() {
     prevBoard,
     setBoard,
     isGameEnd,
+    score,
+    resetBoard,
     handleTouchStart,
     handleTouchEnd,
     tilesUp,

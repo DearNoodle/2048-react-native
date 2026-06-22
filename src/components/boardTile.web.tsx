@@ -18,8 +18,8 @@ function BoardTileComponent({
   tile: Tile;
   prevTile: Tile;
 }) {
-  const tileWidth = 85;
-  const tileMargin = 3;
+  const tileWidth = 106;
+  const tileMargin = 4;
   const cellSize = tileWidth + tileMargin * 2;
 
   const xPos = useSharedValue(tile.col * cellSize);
@@ -221,31 +221,31 @@ const tileTheme: Record<
   number | ">2048",
   { bg: string; text: string; size: number }
 > = {
-  2: { bg: "#eee4da", text: "#776e65", size: 26 },
-  4: { bg: "#ede0c8", text: "#776e65", size: 26 },
-  8: { bg: "#f2b179", text: "#f9f6f2", size: 26 },
-  16: { bg: "#f59563", text: "#f9f6f2", size: 26 },
-  32: { bg: "#f67c5f", text: "#f9f6f2", size: 26 },
-  64: { bg: "#f65e3b", text: "#f9f6f2", size: 26 },
-  128: { bg: "#edcf72", text: "#f9f6f2", size: 22 },
-  256: { bg: "#edcc61", text: "#f9f6f2", size: 22 },
-  512: { bg: "#edc850", text: "#f9f6f2", size: 22 },
-  1024: { bg: "#edc53f", text: "#f9f6f2", size: 18 },
-  2048: { bg: "#edc22e", text: "#f9f6f2", size: 18 },
-  ">2048": { bg: "#73b", text: "#ffffff", size: 16 },
+  2: { bg: "#eee4da", text: "#776e65", size: 32 },
+  4: { bg: "#ede0c8", text: "#776e65", size: 32 },
+  8: { bg: "#f2b179", text: "#f9f6f2", size: 32 },
+  16: { bg: "#f59563", text: "#f9f6f2", size: 32 },
+  32: { bg: "#f67c5f", text: "#f9f6f2", size: 32 },
+  64: { bg: "#f65e3b", text: "#f9f6f2", size: 32 },
+  128: { bg: "#edcf72", text: "#f9f6f2", size: 28 },
+  256: { bg: "#edcc61", text: "#f9f6f2", size: 28 },
+  512: { bg: "#edc850", text: "#f9f6f2", size: 28 },
+  1024: { bg: "#edc53f", text: "#f9f6f2", size: 22 },
+  2048: { bg: "#edc22e", text: "#f9f6f2", size: 22 },
+  ">2048": { bg: "#73b", text: "#ffffff", size: 20 },
 };
 
 const styles = StyleSheet.create({
   tile: {
-    width: 77,
-    height: 77,
-    margin: 16,
-    borderRadius: 6,
+    width: 96,
+    height: 96,
+    margin: 20,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   tileText: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: "bold",
   },
 });
